@@ -20,7 +20,11 @@
     <div v-for="item in infoList" :key="item.t_id" class="talkArea">
       <div class="header">
         <div class="talk-header">
-          <el-avatar :src="item.img"></el-avatar>
+          <div class="block">
+            <el-avatar :src="item.img" ></el-avatar>
+            <div><span class="avatar_info">{{ item.userName }}</span></div>
+            
+          </div>
         </div>
       </div>
       <li class="content-style">{{ item.content }}</li>
@@ -122,10 +126,10 @@ export default {
       if (res.meta.status != 200) {
         return this.$message.error("请求数据失败！");
       }
-      this.infoList = res.data;
+      this.infoList = res.data3;
       // console.log("res.data: ", res.data);
       // console.log("res.data2: ", res.data2);
-      // console.log("res.data3: ", res.data3);
+      console.log("res.data3: ", res.data3);
 
       if (this.$store.state.token != "") {
         const userId = sessionStorage.getItem("userId");
@@ -348,6 +352,18 @@ export default {
 .talk-header {
   padding-top: 2%;
   padding-left: 2%;
+  .block {
+    display: flex;
+    .el-avatar {
+      display: inline;
+    }
+    .avatar_info {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2e3135;
+      margin-left: .43rem;
+    }
+  }
 }
 
 .editArea {
@@ -438,4 +454,6 @@ export default {
     }
   }
 }
+
+
 </style>
