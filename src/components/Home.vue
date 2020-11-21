@@ -21,14 +21,14 @@
         v-model="input"
         clearable
       ></el-input>
-      <el-button class="login" v-if="!$store.state.token" type="primary" @click="login"
+      <el-button class="login" v-if="!this.$cookies.isKey('WACKYBOY')" type="primary" @click="login"
         >登录</el-button
       >
-      <el-button v-if="$store.state.token" :type="editState" @click="edit"
+      <el-button v-if="this.$cookies.isKey('WACKYBOY')" :type="editState" @click="edit"
         >记录心情</el-button
       >
-      <el-dropdown v-if="$store.state.token">
-        <el-avatar fit="fill" :src="avartar_img"></el-avatar>
+      <el-dropdown v-if="this.$cookies.isKey('WACKYBOY')">
+        <el-avatar fit="fill" :src="user.avatar_img"></el-avatar>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item @click.native="writePaper">写文章</el-dropdown-item>
           <el-dropdown-item>我赞过的</el-dropdown-item>
@@ -54,8 +54,8 @@ export default {
     return {
       activeIndex: "welcome",
       input: "",
-      userName: "",
-      avartar_img: "",
+      user: {
+      },
       editState: "primary"
     };
   },
@@ -86,20 +86,23 @@ export default {
     clicked() {
       console.log("点击了头像");
     },
+    // 获取进入首页的用户信息表
     async getUserInfoList() {
-      const { data: res } = await this.$http.get("/info");
-      console.log("res", res);
-      if (res.meta.status !== 200) return this.$message.error("获取信息失败");
-      // this.$message.success("获取信息成功");
-      this.userName = res.result.userName;
-      this.avartar_img = res.result.avatar_img;
+      const { data: res } = await this.$http.get("/auth/verify");
+      this.user = res;
+      this.$store.state.user = this.user;
+      localStorage.setItem("userid", this.user.userid);
+      console.log('verify');
     },
+
     writePaper() {
       console.log("写文章");
     },
+
     editInfo() {
       this.$router.push("/editInfo");
     },
+
     logout() {
       this.$confirm("请问确定退出么, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -107,7 +110,8 @@ export default {
         type: "warning",
       })
         .then(() => {
-          sessionStorage.clear()
+          // 应该同样是要请求后端删除Cookie，安全
+          this.$cookies.remove("WACKYBOY" , "/" , "localhost")
           location.reload()
           this.$message({
             type: "success",

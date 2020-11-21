@@ -16,6 +16,7 @@ const store = new Vuex.Store({
         editBox: 'display:none',
         userId: '',
         comment_list: [],
+        user:{},
     },
     mutations: {
         set_token(state, token) {

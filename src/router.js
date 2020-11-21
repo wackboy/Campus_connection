@@ -20,6 +20,7 @@ if (sessionStorage.getItem('token')) {
 const router = new Router ({
     // 改变url的生成方式（原来是哈希），后端可能要做相应的调整
     mode: 'history',
+    // mode: 'hash',
     routes: [
         {
             path: '/',

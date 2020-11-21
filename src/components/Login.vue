@@ -9,7 +9,7 @@
             <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" label-width="0px" class="login_form">
                 <!-- 用户名 -->
                 <el-form-item prop="username">
-                    <el-input v-model="loginForm.userName" prefix-icon="el-icon-user-solid"></el-input>
+                    <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid"></el-input>
                 </el-form-item>
                 <!-- 密码 -->
                 <el-form-item prop="password">
@@ -33,13 +33,13 @@ export default {
         return {
             // 这是登录表单的数据绑定对象
             loginForm: {
-                userName: '风缘',
+                username: '风缘',
                 password: '123456'
             },
             // 这是表单的验证规则对象
             loginFormRules: {
                 // 验证用户名是否合法
-                userName: [
+                username: [
                     { required: true, message: '请输入用户名', trigger: 'blur' }
                 ],
                 // 验证密码是否合法
@@ -61,10 +61,15 @@ export default {
         async login() {
             this.$refs.loginFormRef.validate(async valid => {
                 if(!valid)  return;
-                const {data: res} = await this.$http.post('login', this.loginForm);
-                if(res.meta.status !== 200) return this.$message.error('登录失败');
-                this.$store.commit('set_userId',res.result.userId)
-                sessionStorage.setItem('avatar_img', res.result.avatar_img)
+                let formData = new FormData;
+                formData.append("username", this.loginForm.username);
+                formData.append("password", this.loginForm.password);
+                const res = await this.$http.post('/auth/accredit', formData);
+                // console.log('res:', res);
+                // if(res.meta.status !== 200) return this.$message.error('登录失败');
+                // console.log('res:', res.headers);
+                // this.$store.commit('set_userId',res.result.userId)
+                // sessionStorage.setItem('avatar_img', res.result.avatar_img)
                 this.$message.success('登录成功了！')
                 /* 
                     1. 将登录成功后的token，保存到客户端的sessionStorage中
@@ -72,7 +77,7 @@ export default {
                         1.2 token只应在当前网站打开期间生效，所以将token保存在sessionStorage中，保存在localStorage中则是持久化存储
                 */
                 // 调用store中的mutations方法，将token值赋给state中的token
-                this.$store.commit('set_token', res.token)
+                // this.$store.commit('set_token', res.token)
                 // sessionStorage.setItem('eleToken', res.token)
                 // this.$store.state.token = localStorage.getItem('eleToken')  
                 // window.sessionStorage.setItem('token', res.data.token);
@@ -146,15 +151,15 @@ export default {
 
 /* methods: {
     async clickme() {
-        const userName = '风缘'
+        const username = '风缘'
         const password = '123456'
-        const {data: res} = await this.$http.post('/login?userName=' + userName + '&&password=' + password)
+        const {data: res} = await this.$http.post('/login?username=' + username + '&&password=' + password)
         console.log('res: ', res);
         localStorage.setItem('eleToken', res.token)
         this.$store.state.token = localStorage.getItem('eleToken')
         if(res.meta.status != 200) {
             return this.$message.error("请求数据失败！")
         }
-        this.userName = res.result.userName
+        this.username = res.result.username
         this.$router.replace('/home')
     } */

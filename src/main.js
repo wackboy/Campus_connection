@@ -6,10 +6,15 @@ import './plugins/element'
 import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/global.css'
 import axios from 'axios'
+import VueCookies from 'vue-cookies'
+
+Vue.use(VueCookies)
 
 
 // 配置请求的根路径
-axios.defaults.baseURL = 'http://localhost:3000'
+axios.defaults.baseURL = 'http://localhost:10010/api'
+// 默认axios携带Cookie设置为true
+axios.defaults.withCredentials=true
 
 // 定义全局默认配置
 axios.defaults.headers.common['token'] = store.state.token;
@@ -43,11 +48,13 @@ axios.interceptors.response.use(
           })
       }
     }
-    return Promise.reject(error.response.data)
+    return Promise.reject(error.response)   // 这里我删除了.data
   }
 )
 
-
+// //这两个需要设置，不然前端向后台不能传递数据
+// Vue.http.options.emulateJSON = true
+// Vue.http.options.emulateHTTP = true
 
 new Vue({
   router,

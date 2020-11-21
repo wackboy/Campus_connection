@@ -22,13 +22,17 @@
         <div class="talk-header">
           <div class="block">
             <el-avatar :src="item.img" ></el-avatar>
-            <div><span class="avatar_info">{{ item.userName }}</span></div>
-            
+            <div>
+              <div><span class="avatar_info">{{ item.username }}</span></div>
+              <div><span class="talk_time">{{ item.upload_time}}</span></div>
+            </div>
           </div>
         </div>
       </div>
       <li class="content-style">{{ item.content }}</li>
-      <!-- 点赞、评论、分享区域 -->
+      <!-- 点赞、评论、分享区域 
+            注意：实时点赞数和评论数可以通过watch来进行监听更新，后续可以做更改
+      -->
       <div class="pin-action-row">
         <div class="action-box">
           <div class="like-action" @click="like(item.t_id)">
@@ -119,31 +123,24 @@ export default {
     this.getInfoList();
   },
   methods: {
-    async getInfoList() {
-      this.avatar_img = sessionStorage.getItem("avatar_img");
-      const { data: res } = await this.$http.get("/");
-      console.log(res);
-      if (res.meta.status != 200) {
-        return this.$message.error("请求数据失败！");
-      }
-      this.infoList = res.data3;
-      // console.log("res.data: ", res.data);
-      // console.log("res.data2: ", res.data2);
-      console.log("res.data3: ", res.data3);
 
-      if (this.$store.state.token != "") {
-        const userId = sessionStorage.getItem("userId");
-        for (let i of res.data2) {
-          if (parseInt(i.u_id) == parseInt(userId)) {
-            this.user_like_list.push(i.t_id);
-            console.log("加入成功");
-          } else {
-            console.log("加入失败");
-          }
-        }
-        console.log(this.user_like_list);
+    // 获取登录首页的用户talk表展示sa
+    async getInfoList() {
+      // 使用Java编写后端后这里要变换请求路径为：/talk
+      const { data: res } = await this.$http.get("/item/talk/");
+      // 存放talk信息，展示在首页
+      this.infoList = res;
+      console.log("infoList: ", this.infoList);
+      let info = []
+      for(info of this.infoList) {
+        info.upload_time = new Date(parseInt(info.upload_time)).toLocaleString()
       }
+      const like_res = await this.$http.get("/item/like/" + localStorage.getItem("userid"))
+      // 存放登录的用户记录的点赞talkid
+      this.user_like_list = like_res.data;
     },
+
+    // 发布talk内容
     async upload() {
       if (!this.textarea) {
         this.$message.error("发布内容不能为空！");
@@ -163,12 +160,14 @@ export default {
       }
     },
     async like(t_id) {
-      if (!sessionStorage.getItem("token")) {
+      let likeData = new FormData;
+      if (!this.$cookies.isKey("WACKYBOY")) {
         return this.$message.error("请先登录账号！");
       }
-      const { data: res } = await this.$http.post("like", { t_id: t_id });
-      console.log("like 的 res: ", res);
-      if (res.meta.status != 200) {
+      likeData.append("t_id", t_id);
+      likeData.append("u_id", this.$store.state.user.userid);
+      const res = await this.$http.post("/item/like",likeData);
+      if (res.status != 200) {
         return this.$message.error("点赞失败！");
       } else {
         return this.reload();
@@ -362,6 +361,9 @@ export default {
       font-weight: 600;
       color: #2e3135;
       margin-left: .43rem;
+    }
+    .talk_time {
+      font-size: 10px;
     }
   }
 }
